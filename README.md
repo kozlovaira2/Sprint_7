@@ -66,27 +66,9 @@ allure serve allure_results
 
 
 ## Структура проекта  
-Sprint_7/
-├── pages/                          # Page Object Model
-│   ├── __init__.py
-│   ├── base_page.py                # Базовая страница (общие методы)
-│   ├── main_page.py                # Главная страница
-│   ├── order_page.py               # Страница заказа
-│   ├── order_status_page.py        # Страница статуса заказа
-│   └── dzen_page.py                # Страница Дзена
-├── tests/                          # Тесты
-│   ├── __init__.py
-│   ├── test_order_flow.py          # Тесты оформления заказа
-│   ├── test_order_status.py        # Тесты проверки статуса заказа
-│   └── test_navigation.py          # Тесты навигации
-├── utils/                          # Вспомогательные модули
-│   ├── __init__.py
-│   ├── urls.py                     # URL-адреса
-│   ├── test_data.py                # Тестовые данные
-│   └── helpers.py                  # Вспомогательные функции
-├── allure_results/                 # Результаты тестов для Allure
-├── conftest.py                     # Фикстуры pytest
-├── data.py                         # Тестовые данные (обратная совместимость)
-├── requirements.txt                # Зависимости проекта
-├── .gitignore                      # Игнорируемые файлы
-└── README.md                       # Документация проекта# Sprint_7
+tests/ — тесты создания курьера, создания заказа, авторизации курьера, списка заказов  
+utils/ — вспомогательные модули  
+helpers.py - вспомогательные функции  
+conftest.py — фикстуры  
+data.py — тестовые данные   
+allure-report/ — cгенерированный Allure-отчёт
