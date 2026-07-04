@@ -41,19 +41,17 @@ allure serve allure_results
 
 | Тест | Описание |
 |------|----------|
-| `test_login_courier_success` | Успешная авторизация |
-| `test_login_courier_missing_password` | Ошибка при авторизации без пароля |
-| `test_login_courier_missing_login` | Ошибка при авторизации без логина |
-| `test_login_courier_invalid_login` | Ошибка при неверном логине |
-| `test_login_courier_invalid_password` | Ошибка при неверном пароле |
-| `test_login_nonexistent_courier` | Ошибка при авторизации несуществующего пользователя |
+| `test_courier_log_in` | Успешная авторизация |
+| `test_courier_log_negative` | Ошибка при неверном логине или пароле |
+| `test_courier_log_with_empty_login` | Ошибка при авторизации с пустым логином |
+| `test_courier_log_with_empty_password` | Ошибка при авторизации с пустым паролем |
 
 #### Создание заказа (`test_create_order.py`)
 
 | Тест | Описание |
 |------|----------|
 | `test_create_order_success` | Успешное создание заказа |
-| `test_create_order_with_colors` | Создание заказа с разными цветами (параметризованный) |
+| `test_create_order_with_colors` | Создание заказа с разными цветами |
 | `test_create_order_without_color` | Создание заказа без указания цвета |
 | `test_create_order_track_number` | Проверка корректности track-номера |
 
@@ -66,9 +64,10 @@ allure serve allure_results
 
 
 ## Структура проекта  
-tests/ — тесты создания курьера, создания заказа, авторизации курьера, списка заказов  
-utils/ — вспомогательные модули  
-helpers.py - вспомогательные функции  
+
+tests/ — тесты создания курьера, создания заказа, авторизации курьера, списка заказов 
+utils/ — вспомогательные модули 
+helpers.py - вспомогательные функции 
 conftest.py — фикстуры  
 data.py — тестовые данные   
 allure-report/ — cгенерированный Allure-отчёт
