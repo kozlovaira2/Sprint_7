@@ -15,9 +15,6 @@ class Endpoints:
     # Заказы
     ORDERS = f"{BASE_URL}{API_VERSION}/orders"
     ORDER_TRACK = f"{BASE_URL}{API_VERSION}/orders/track"
-    ORDER_ACCEPT = f"{BASE_URL}{API_VERSION}/orders/accept"
-    ORDER_CANCEL = f"{BASE_URL}{API_VERSION}/orders/cancel"
-    ORDER_FINISH = f"{BASE_URL}{API_VERSION}/orders/finish"
     
     @staticmethod
     def courier_by_id(courier_id):
@@ -38,3 +35,18 @@ class Endpoints:
     def courier_orders(courier_id):
         """Получить URL для заказов курьера"""
         return f"{BASE_URL}{API_VERSION}/courier/orders?courierId={courier_id}"
+    
+    @staticmethod
+    def accept_order(order_id, courier_id):
+        """Получить URL для принятия заказа"""
+        return f"{BASE_URL}{API_VERSION}/orders/accept?orderId={order_id}&courierId={courier_id}"
+    
+    @staticmethod
+    def cancel_order(order_id):
+        """Получить URL для отмены заказа"""
+        return f"{BASE_URL}{API_VERSION}/orders/cancel?orderId={order_id}"
+    
+    @staticmethod
+    def finish_order(order_id):
+        """Получить URL для завершения заказа"""
+        return f"{BASE_URL}{API_VERSION}/orders/finish?orderId={order_id}"
