@@ -4,6 +4,9 @@
 
 import random
 import string
+import requests
+
+from utils.endpoints import Endpoints
 
 
 class StatusCodes:
@@ -19,21 +22,15 @@ class StatusCodes:
     NOT_FOUND = 404
     CONFLICT = 409
     INTERNAL_SERVER_ERROR = 500
-    
-    SUCCESS_CODES = [200, 201, 202, 204]
-    CLIENT_ERROR_CODES = [400, 401, 403, 404, 409]
-    SERVER_ERROR_CODES = [500, 502, 503, 504]
 
 
 class CourierData:
     """Данные для тестирования курьеров"""
     
-    # Базовые тестовые данные
     DEFAULT_LOGIN = "test_courier"
     DEFAULT_PASSWORD = "123456"
     DEFAULT_FIRST_NAME = "TestUser"
     
-    # Невалидные данные
     INVALID_LOGIN = "invalid_user"
     INVALID_PASSWORD = "wrong_password"
     EMPTY_STRING = ""
@@ -52,30 +49,11 @@ class CourierData:
     def generate_random_first_name():
         """Генерация случайного имени"""
         return ''.join(random.choices(string.ascii_lowercase, k=8))
-    
-    @staticmethod
-    def generate_courier_payload():
-        """Генерация полных данных для создания курьера"""
-        return {
-            "login": CourierData.generate_random_login(),
-            "password": CourierData.generate_random_password(),
-            "firstName": CourierData.generate_random_first_name()
-        }
-    
-    @staticmethod
-    def get_valid_courier_data():
-        """Получить валидные данные курьера"""
-        return {
-            "login": CourierData.DEFAULT_LOGIN,
-            "password": CourierData.DEFAULT_PASSWORD,
-            "firstName": CourierData.DEFAULT_FIRST_NAME
-        }
 
 
 class OrderData:
     """Данные для тестирования заказов"""
     
-    # Базовые данные для заказа
     FIRST_NAME = "Test"
     LAST_NAME = "User"
     ADDRESS = "Test Address 123"
@@ -85,7 +63,6 @@ class OrderData:
     DELIVERY_DATE = "2026-07-10"
     COMMENT = "Test comment"
     
-    # Варианты цветов для параметризации
     COLOR_OPTIONS = [
         (["BLACK"], "black_only"),
         (["GREY"], "grey_only"),
@@ -93,16 +70,10 @@ class OrderData:
         ([], "no_color")
     ]
     
-    # Дополнительные варианты
-    COLOR_BLACK = ["BLACK"]
-    COLOR_GREY = ["GREY"]
-    COLOR_BOTH = ["BLACK", "GREY"]
-    COLOR_NONE = []
-    
     @staticmethod
     def generate_order_payload(color=None):
         """Генерация данных для создания заказа"""
-        payload = {
+        return {
             "firstName": OrderData.FIRST_NAME,
             "lastName": OrderData.LAST_NAME,
             "address": OrderData.ADDRESS,
@@ -110,62 +81,31 @@ class OrderData:
             "phone": OrderData.PHONE,
             "rentTime": OrderData.RENT_TIME,
             "deliveryDate": OrderData.DELIVERY_DATE,
-            "comment": OrderData.COMMENT
+            "comment": OrderData.COMMENT,
+            "color": color if color is not None else []
         }
-        if color is not None:
-            payload["color"] = color
-        return payload
     
     @staticmethod
-    def get_invalid_order_data():
-        """Получить невалидные данные для заказа"""
-        return {
-            "firstName": "",  # Пустое имя
-            "lastName": "User",
-            "address": "Test",
-            "metroStation": -1,  # Неверная станция
-            "phone": "123",  # Неверный телефон
-            "rentTime": 0,  # Некорректное время
-            "deliveryDate": "2020-01-01",  # Прошлая дата
-            "comment": ""
-        }
+    def create_order_request(color=None):
+        """Отправляет запрос на создание заказа"""
+        payload = OrderData.generate_order_payload(color)
+        return requests.post(Endpoints.ORDERS, json=payload)
 
 
 class Users:
     """Тестовые данные для авторизации"""
     
-    # Данные для проверки неверного логина/пароля
     data_negative = {
         "login": "invalid_user",
         "password": "wrong_password"
     }
     
-    # Данные для проверки авторизации с пустым логином
     data_with_empty_login = {
         "login": "",
         "password": "123456"
     }
     
-    # Данные для проверки авторизации с пустым паролем
     data_with_empty_password = {
         "login": "test_courier",
         "password": ""
     }
-
-
-class Headers:
-    """Заголовки HTTP запросов"""
-    
-    DEFAULT = {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-    }
-    
-    AUTH_HEADER = "Authorization"
-    CONTENT_TYPE = "Content-Type"
-    ACCEPT = "Accept"
-    
-    @staticmethod
-    def get_auth_header(token):
-        """Получить заголовок авторизации"""
-        return {Headers.AUTH_HEADER: f"Bearer {token}"}

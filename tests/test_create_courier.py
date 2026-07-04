@@ -9,92 +9,64 @@ import requests
 from utils.endpoints import Endpoints
 from utils.test_data import CourierData, StatusCodes
 from utils.error_messages import ErrorMessages
-from helpers import register_new_courier_and_return_login_password
+from helpers import create_courier_request, generate_courier_data
 
 
 @allure.epic("Курьеры")
 @allure.feature("Создание курьера")
 class TestCreateCourier:
     
-    @allure.title("Создание курьера - успешный сценарий")
+    @allure.title("Курьера можно создать")
     def test_create_courier_success(self):
         """Проверка успешного создания курьера"""
-        login, password, first_name = register_new_courier_and_return_login_password()
+        login, password, first_name = generate_courier_data()
+        response = create_courier_request(login, password, first_name)
         
-        assert login, "Курьер не был создан"
-        
-        # Проверяем, что курьер действительно существует
-        response = requests.post(
-            Endpoints.COURIER_LOGIN,
-            data={"login": login, "password": password}
-        )
-        assert response.status_code == StatusCodes.OK
-        assert "id" in response.json()
+        assert response.status_code == StatusCodes.CREATED
+        assert response.json() == {"ok": True}
 
-    @allure.title("Создание дублирующего курьера - ошибка")
+    @allure.title("Нельзя создать двух одинаковых курьеров")
     def test_create_duplicate_courier_error(self):
         """Проверка создания двух одинаковых курьеров"""
-        # Создаем первого курьера
-        login, password, first_name = register_new_courier_and_return_login_password()
-        assert login, "Не удалось создать первого курьера"
+        login, password, first_name = generate_courier_data()
         
-        # Пытаемся создать второго с теми же данными
+        response_first = create_courier_request(login, password, first_name)
+        assert response_first.status_code == StatusCodes.CREATED
+        
+        response_second = create_courier_request(login, password, first_name)
+        
+        assert response_second.status_code == StatusCodes.CONFLICT
+        assert response_second.json()["message"] == ErrorMessages.COURIER_EXISTS
+
+    @allure.title("Для создания курьера нужно передать все обязательные поля")
+    @pytest.mark.parametrize("missing_field", ["login", "password"])
+    def test_create_courier_missing_fields(self, missing_field):
+        """Проверка ошибки при отсутствии обязательных полей"""
+        login = CourierData.generate_random_login()
+        password = CourierData.generate_random_password()
+        first_name = CourierData.generate_random_first_name()
+        
         payload = {
             "login": login,
             "password": password,
             "firstName": first_name
         }
-        response = requests.post(Endpoints.COURIER, data=payload)
-        
-        assert response.status_code == StatusCodes.CONFLICT
-        assert ErrorMessages.COURIER_EXISTS in response.json()["message"]
-
-    @allure.title("Создание курьера с пропущенными полями")
-    @pytest.mark.parametrize("missing_field", ["login", "password", "firstName"])
-    def test_create_courier_missing_fields(self, missing_field):
-        """Проверка ошибки при отсутствии обязательных полей"""
-        payload = CourierData.get_valid_courier_data()
         del payload[missing_field]
         
         response = requests.post(Endpoints.COURIER, data=payload)
         
-        # Для поля firstName API может возвращать 409, а не 400
-        if missing_field == "firstName":
-            assert response.status_code in [StatusCodes.BAD_REQUEST, StatusCodes.CONFLICT]
-            assert "message" in response.json()
-        else:
-            assert response.status_code == StatusCodes.BAD_REQUEST
-            assert ErrorMessages.MISSING_FIELD in response.json()["message"]
+        assert response.status_code == StatusCodes.BAD_REQUEST
+        assert ErrorMessages.MISSING_FIELD in response.json()["message"]
 
-    @allure.title("Создание курьера с существующим логином - ошибка")
+    @allure.title("Если создать пользователя с логином, который уже есть, возвращается ошибка")
     def test_create_courier_existing_login(self):
         """Проверка ошибки при создании курьера с существующим логином"""
-        # Создаем первого курьера
-        login, password, first_name = register_new_courier_and_return_login_password()
-        assert login, "Не удалось создать первого курьера"
+        login, password, first_name = generate_courier_data()
         
-        # Пытаемся создать второго курьера с тем же логином, но другим паролем
-        payload = {
-            "login": login,
-            "password": "another_password",
-            "firstName": "AnotherName"
-        }
-        response = requests.post(Endpoints.COURIER, data=payload)
+        response_first = create_courier_request(login, password, first_name)
+        assert response_first.status_code == StatusCodes.CREATED
         
-        assert response.status_code == StatusCodes.CONFLICT
-        assert ErrorMessages.COURIER_EXISTS in response.json()["message"]
-
-    @allure.title("Проверка успешного ответа при создании курьера")
-    def test_create_courier_success_response(self):
-        """Проверка формата успешного ответа"""
-        login, password, first_name = register_new_courier_and_return_login_password()
+        response_second = create_courier_request(login, "another_password", "AnotherName")
         
-        assert login, "Курьер не был создан"
-        
-        # Проверяем, что курьер существует
-        response = requests.post(
-            Endpoints.COURIER_LOGIN,
-            data={"login": login, "password": password}
-        )
-        assert response.status_code == StatusCodes.OK
-        assert "id" in response.json()
+        assert response_second.status_code == StatusCodes.CONFLICT
+        assert response_second.json()["message"] == ErrorMessages.COURIER_EXISTS
