@@ -13,9 +13,9 @@ from utils.test_data import OrderData, StatusCodes
 class TestCreateOrder:
     
     @allure.title("Создание заказа - успешный сценарий")
-    def test_create_order_success(self, create_order):
+    def test_create_order_success(self):
         """Проверка успешного создания заказа"""
-        response = create_order()
+        response = OrderData.create_order_request()
         
         assert response.status_code == StatusCodes.CREATED
         assert "track" in response.json()
@@ -23,26 +23,26 @@ class TestCreateOrder:
 
     @allure.title("Создание заказа с разными вариантами цвета")
     @pytest.mark.parametrize("color, color_name", OrderData.COLOR_OPTIONS)
-    def test_create_order_with_colors(self, create_order, color, color_name):
+    def test_create_order_with_colors(self, color, color_name):
         """Параметризованный тест создания заказа с цветами"""
         with allure.step(f"Создание заказа с цветами: {color_name}"):
-            response = create_order(color)
+            response = OrderData.create_order_request(color)
             
             assert response.status_code == StatusCodes.CREATED
             assert "track" in response.json()
 
     @allure.title("Создание заказа без указания цвета")
-    def test_create_order_without_color(self, create_order):
+    def test_create_order_without_color(self):
         """Проверка создания заказа без указания цвета"""
-        response = create_order()
+        response = OrderData.create_order_request()
         
         assert response.status_code == StatusCodes.CREATED
         assert "track" in response.json()
 
     @allure.title("Проверка корректности track-номера в ответе")
-    def test_create_order_track_number(self, create_order):
+    def test_create_order_track_number(self):
         """Проверка, что track - это положительное число"""
-        response = create_order()
+        response = OrderData.create_order_request()
         
         assert response.status_code == StatusCodes.CREATED
         track = response.json()["track"]
